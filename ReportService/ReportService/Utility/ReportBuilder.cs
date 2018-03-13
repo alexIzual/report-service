@@ -1,7 +1,6 @@
 ﻿using ReportService.Domain;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,15 +9,18 @@ namespace ReportService
 {
     public class ReportBuilder
     {
-        private string _date;
+        private string FormattedReportDate;
 
+        private string WL = "--------------------------------------------";
+        
         private StringBuilder SBuilder { get; set; }
 
         public ReportBuilder(int year, int month)
         {
-            var date = new DateTime(year, month, 1);
+            this.SBuilder = new StringBuilder();
 
-            _date = date.ToString("MMMM yyyy", System.Globalization.CultureInfo.CurrentCulture);
+            var date = new DateTime(year, month, 1);
+            this.FormattedReportDate = date.ToString("MMMM yyyy", System.Globalization.CultureInfo.CurrentCulture);
         }
 
         public byte[] MakeReport(IEnumerable<Employee> employees)
@@ -30,25 +32,29 @@ namespace ReportService
         {
             return Task.Factory.StartNew(() =>
             {
-                foreach (var employee in employees)
-                {
-                    employee.BuhCode = EmpCodeResolver.GetCode(employee.Inn).Result;
-                    employee.Salary = employee.Salary();
+                SBuilder.AppendLine(FormattedReportDate);
 
-                    //actions.Add((new ReportFormatter(null).NL, new Employee()));
-                    //actions.Add((new ReportFormatter(null).WL, new Employee()));
-                    //actions.Add((new ReportFormatter(null).NL, new Employee()));
-                    //actions.Add((new ReportFormatter(null).WD, new Employee() { Department = depName }));
-                    //for (int i = 1; i < emplist.Count(); i++)
-                    //{
-                    //    actions.Add((new ReportFormatter(emplist[i]).NL, emplist[i]));
-                    //    actions.Add((new ReportFormatter(emplist[i]).WE, emplist[i]));
-                    //    actions.Add((new ReportFormatter(emplist[i]).WT, emplist[i]));
-                    //    actions.Add((new ReportFormatter(emplist[i]).WS, emplist[i]));
-                    //}
-                    //actions.Add((new ReportFormatter(null).NL, null));
-                    //actions.Add((new ReportFormatter(null).WL, null));
+                var groupedByDepartment = employees.GroupBy(q => q.Department);
+                foreach (var department in groupedByDepartment)
+                {
+                    SBuilder.AppendLine();
+                    SBuilder.AppendLine(WL);
+                    SBuilder.AppendLine();
+                    SBuilder.AppendLine(department.Key);
+
+                    foreach (var employee in department)
+                    {
+                        SBuilder.AppendLine();
+                        SBuilder.AppendLine(employee.Name + " " + Math.Round(employee.Salary, 0, MidpointRounding.AwayFromZero) + "р");
+                    }
+
+                    SBuilder.AppendLine();
+                    SBuilder.AppendLine("Всего по отделу " + Math.Round(department.Sum(s => s.Salary), 0, MidpointRounding.AwayFromZero) + "р");
                 }
+                SBuilder.AppendLine();
+                SBuilder.AppendLine(WL);
+                SBuilder.AppendLine();
+                SBuilder.AppendLine("Всего по предприятию " + Math.Round(groupedByDepartment.Sum(s => s.Sum(e => e.Salary)), 0, MidpointRounding.AwayFromZero) + "р");
 
                 return UTF8Encoding.UTF8.GetBytes(SBuilder.ToString());
             });

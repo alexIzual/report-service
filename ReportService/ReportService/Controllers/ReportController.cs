@@ -1,29 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
+﻿using Microsoft.AspNetCore.Mvc;
+using ReportService.Services;
+using System;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
-using Npgsql;
-using ReportService.DAL;
-using ReportService.Domain;
 
 namespace ReportService.Controllers
 {
     [Route("api/[controller]")]
     public class ReportController : Controller
     {
-        private const string CACHE_KEY = "_mihalych";
+        private readonly IEmployeeService _employeeService;
 
-        private readonly IMemoryCache _cache;
-        private readonly IEmployeeRepository _employeeRepository;
-
-        public ReportController(IEmployeeRepository employeeRepository, IMemoryCache memoryCache)
+        public ReportController(IEmployeeService employeeService)
         {
-            this._employeeRepository = employeeRepository;
-            this._cache = memoryCache;
+            this._employeeService = employeeService;
         }
 
         [HttpGet]
@@ -36,19 +25,13 @@ namespace ReportService.Controllers
 
             try
             {
-                var cacheEntry = await _cache.GetOrCreateAsync(CACHE_KEY + month + year, async (entry) =>
-                {
-                    var employees = await _employeeRepository.GetEmployeesAsync();
+                var employees = await _employeeService.GetEmployeesWithSalaryAsync(year, month);
 
-                    entry.Value = employees;
-                    entry.SlidingExpiration = TimeSpan.FromDays(30);
-
-                    return (IEnumerable<Domain.Employee>)entry.Value;
-                });
+                byte[] buff = await new ReportBuilder(year, month).MakeReportAsync(employees);
                 
-                var buff = await new ReportBuilder(year, month).MakeReportAsync(cacheEntry);
+                string fileName = $"report_{month}_{year}.txt";
 
-                return File(buff, "application/octet-stream", "report.txt");
+                return File(buff, "application/octet-stream", fileName);
             }
             catch (Exception ex)
             {

@@ -10,29 +10,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\" />
+    <Compile Remove="MonthResolver\**" />
+    <Compile Remove="wwwroot\**" />
+    <Content Remove="MonthResolver\**" />
+    <Content Remove="wwwroot\**" />
+    <EmbeddedResource Remove="MonthResolver\**" />
+    <EmbeddedResource Remove="wwwroot\**" />
+    <None Remove="MonthResolver\**" />
+    <None Remove="wwwroot\**" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.4" />
-    <PackageReference Include="Facebook" Version="7.0.6" />
-    <PackageReference Include="iTextSharp" Version="5.5.13" />
-    <PackageReference Include="json-serialize" Version="1.1.2" />
-    <PackageReference Include="Microsoft.AppCenter.Push" Version="1.4.0" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
-    <PackageReference Include="MySql.Data" Version="6.10.6" />
     <PackageReference Include="Npgsql" Version="3.2.6" />
   </ItemGroup>
 
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="MonthNameResolver">
-      <HintPath>MonthResolver\MonthNameResolver.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
   </ItemGroup>
 
 </Project>

@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Npgsql;
+using ReportService.Clients;
 using ReportService.DAL;
+using ReportService.Services;
 
 namespace ReportService
 {
@@ -28,9 +22,13 @@ namespace ReportService
         {
             services.AddMemoryCache();
             services.AddMvc();
-            
-            services.AddScoped<IEmployeeRepository>(s => 
+
+            services.AddScoped<IEmployeeRepository>(s =>
                 new EmployeeRepository(Configuration.GetConnectionString("DefaultConnectionString")));
+
+            services.AddScoped<IEmployeeService, EmployeeService>();
+            services.AddScoped<IBuhApiClient, BuhApiClient>();
+            services.AddScoped<ISalaryApiClient, SalaryApiClient>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,7 +38,7 @@ namespace ReportService
             {
                 app.UseDeveloperExceptionPage();
             }
-            
+
             app.UseMvc();
         }
     }

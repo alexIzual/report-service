@@ -1,9 +1,6 @@
-﻿using System;
+﻿using Dapper;
 using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
-using Dapper;
 
 namespace ReportService.DAL
 {
@@ -20,7 +17,7 @@ namespace ReportService.DAL
             return this.GetEmployeesAsync().Result;
         }
 
-        public async Task<IEnumerable<Domain.Employee>> GetEmployeesAsync()
+        public Task<IEnumerable<Domain.Employee>> GetEmployeesAsync()
         {
             string sql = @"SELECT e.name AS Name, 
                                e.inn AS Inn, 
@@ -28,7 +25,7 @@ namespace ReportService.DAL
                         FROM emps e 
                         LEFT JOIN deps d ON e.departmentid = d.id AND d.active = true";
             
-            return await base.Db.QueryAsync<Domain.Employee>(sql);
+            return base.Db.QueryAsync<Domain.Employee>(sql);
         }
     }
 }
