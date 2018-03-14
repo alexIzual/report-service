@@ -1,82 +1,73 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using ReportService.Controllers;
-using ReportService.DAL;
 using ReportService.Domain;
 using ReportService.Services;
-using ReportService.Clients;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
-using System;
 
 namespace ReportService.Test
 {
     public class ReportControllerTests
     {
-        [Fact]
-        public async void Download_ReturnsFile()
+        [Fact(DisplayName = "ReportController.Download_WithValidDate_ReturnFileTest")]
+        public async void Download_WithValidDate_ReturnFileTest()
         {
-            int year = 2018, month = 2;
+            int validYear = 2018;
+            int validMonth = 2;
 
-            var mockBuhApiClient = new Mock<IBuhApiClient>();
-            mockBuhApiClient.Setup(s => s.GetBuhCodeByInn(It.IsAny<string>()))
-                .Returns(Task.FromResult(GetTestBuhCode()));
+            var mockService = new Mock<IEmployeeService>();
+            mockService.Setup(s => s.GetEmployeesWithSalaryAsync(validYear, validMonth))
+                .Returns(Task.FromResult(GetTestEmployeesWithSalary()));
 
-            var mockSalaryApiClient = new Mock<ISalaryApiClient>();
-            mockSalaryApiClient.Setup(s => s.GetSalary(It.IsAny<Employee>()))
-                .Returns(Task.FromResult(GetTestSalary()));
-
-            var mockRepo = new Mock<IEmployeeRepository>();
-            mockRepo.Setup(s => s.GetEmployeesAsync())
-                .Returns(Task.FromResult(GetTestEmployees()));
-
-            var cache = new MemoryCache(new MemoryCacheOptions());
-
-            var mockService = new Mock<EmployeeService>(mockRepo.Object, cache, mockSalaryApiClient.Object, mockBuhApiClient.Object);
-            
             var controller = new ReportController(mockService.Object);
 
-            var result = await controller.Download(year, month);
+            var result = await controller.Download(validYear, validMonth);
 
             Assert.IsType<FileContentResult>(result);
-
             Assert.True(((FileContentResult)result).FileContents.Length > 0);
         }
 
-        private IEnumerable<Employee> GetTestEmployees()
+        [Fact(DisplayName = "ReportController.Download_WithNotValidDate_ReturnBadRequestTest")]
+        public async void Download_WithNotValidDate_ReturnBadRequestTest()
+        {
+            int notValidYear = 10000;
+            int notValidMonth = 15;
+
+            var mockService = new Mock<IEmployeeService>();
+            mockService.Setup(s => s.GetEmployeesWithSalaryAsync(notValidYear, notValidMonth))
+                .Returns(Task.FromResult(GetTestEmployeesWithSalary()));
+
+            var controller = new ReportController(mockService.Object);
+            
+            var result = await controller.Download(notValidYear, notValidMonth);
+
+            Assert.IsType<BadRequestResult>(result);
+        }
+        
+        private IEnumerable<Employee> GetTestEmployeesWithSalary()
         {
             var emps = new List<Employee>();
-            emps.Add(new Employee()
+
+            for (int i = 0; i < 1500; i++)
             {
-                Name = "Андрей Сергеевич Бубнов",
-                Department = "ФинОтдел",
-                Inn = "123"
-            });
-            emps.Add(new Employee()
-            {
-                Name = "Андрей Сергеевич Бубнов",
-                Department = "ФинОтдел",
-                Inn = "321"
-            });
-            emps.Add(new Employee()
-            {
-                Name = "Фрол Романович Козлов",
-                Department = "ИТ",
-                Inn = "213"
-            });
-            emps.Add(new Employee()
-            {
-                Name = "Арвид Янович Пельше",
-                Department = "ИТ",
-                Inn = "312"
-            });
+                emps.Add(new Employee()
+                {
+                    Name = "Андрей Сергеевич Бубнов",
+                    Department = "ФинОтдел",
+                    Inn = Guid.NewGuid().ToString(),
+                    Salary = GetTestSalary()
+                });
+            }
+
             return emps;
         }
 
         private decimal GetTestSalary()
         {
+            Task.Delay(500);
             var rand = new Random();
 
             return rand.Next(10000, 150000);
@@ -84,6 +75,7 @@ namespace ReportService.Test
 
         private string GetTestBuhCode()
         {
+            Task.Delay(500);
             return Guid.NewGuid().ToString();
         }
     }

@@ -1,12 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using ReportService.Domain;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ReportService.DAL
 {
     public interface IEmployeeRepository : IBaseRepository
     {
-        IEnumerable<Domain.Employee> GetEmployees();
-
-        Task<IEnumerable<Domain.Employee>> GetEmployeesAsync();
+        /// <summary>
+        /// Возвращает список всех сотрудников.
+        /// </summary>
+        /// <returns></returns>
+        Task<IEnumerable<Employee>> GetEmployeesAsync();
     }
 }

@@ -11,12 +11,10 @@ namespace ReportService.DAL
         {
         }
 
-
-        public IEnumerable<Domain.Employee> GetEmployees()
-        {
-            return this.GetEmployeesAsync().Result;
-        }
-
+        /// <summary>
+        /// Возвращает список всех сотрудников.
+        /// </summary>
+        /// <returns></returns>
         public Task<IEnumerable<Domain.Employee>> GetEmployeesAsync()
         {
             string sql = @"SELECT e.name AS Name, 

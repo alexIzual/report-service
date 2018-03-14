@@ -4,6 +4,11 @@ namespace ReportService.Clients
 {
     public interface IBuhApiClient
     {
-        Task<string> GetBuhCodeByInn(string inn);
+        /// <summary>
+        /// Возвращает код сотрудника из сервиса кадровиков.
+        /// </summary>
+        /// <param name="inn"></param>
+        /// <returns></returns>
+        Task<string> GetBuhCodeByInnAsync(string inn);
     }
 }
