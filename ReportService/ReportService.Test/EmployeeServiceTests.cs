@@ -37,7 +37,6 @@ namespace ReportService.Test
             Assert.NotNull(result);
             Assert.NotEmpty(result);
             Assert.True(result.All(q => q.Salary.HasValue));
-            Assert.True(result.All(q => q.Salary.HasValue));
         }
 
         private IEnumerable<Employee> GetTestEmployees()

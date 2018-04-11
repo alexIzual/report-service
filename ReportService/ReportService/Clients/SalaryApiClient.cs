@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ReportService.Clients
 {
-    public class SalaryApiClient : BaseClient, ISalaryApiClient
+    public class SalaryApiClient : ISalaryApiClient
     {
         /// <summary>
         /// Возвращает зарплату сотрудника из веб-сервиса бухгалтерского отдела.
@@ -22,11 +22,15 @@ namespace ReportService.Clients
             JObject jsonObject = JObject.FromObject(new { employee.BuhCode });
 
             var content = new StringContent(jsonObject.ToString(), Encoding.UTF8, "application/json");
-            var response = await HttpClient.PostAsync("http://salary.local/api/empcode/" + employee.Inn, content);
 
-            string responseAsString = await response.Content.ReadAsStringAsync();
+            using (HttpClient client = new HttpClient())
+            {
+                var response = await client.PostAsync("http://salary.local/api/empcode/" + employee.Inn, content);
 
-            return decimal.Parse(responseAsString);
+                string responseAsString = await response.Content.ReadAsStringAsync();
+
+                return decimal.Parse(responseAsString);
+            }
         }
     }
 }

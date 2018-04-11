@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace ReportService.Clients
 {
-    public class BuhApiClient : BaseClient, IBuhApiClient
+    public class BuhApiClient : IBuhApiClient
     {
         /// <summary>
         /// Возвращает код сотрудника из сервиса кадровиков.
@@ -12,7 +12,10 @@ namespace ReportService.Clients
         /// <returns></returns>
         public Task<string> GetBuhCodeByInnAsync(string inn)
         {
-            return HttpClient.GetStringAsync("http://buh.local/api/inn/" + inn);
+            using (HttpClient client = new HttpClient())
+            {
+                return client.GetStringAsync("http://buh.local/api/inn/" + inn);
+            }
         }
     }
 }

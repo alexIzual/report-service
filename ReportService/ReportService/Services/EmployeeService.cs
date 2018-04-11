@@ -90,7 +90,7 @@ namespace ReportService.Services
                 entry.Value = employees;
 
                 // Срок хранения объекта в кэше.
-                entry.SlidingExpiration = TimeSpan.FromDays(30);
+                entry.SlidingExpiration = TimeSpan.FromHours(10);
 
                 return employees;
             });

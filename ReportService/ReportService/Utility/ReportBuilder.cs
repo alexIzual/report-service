@@ -1,6 +1,7 @@
 ﻿using ReportService.Domain;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,7 +10,8 @@ namespace ReportService
 {
     public class ReportBuilder
     {
-        private string FormattedReportDate;
+        private int _year;
+        private int _month;
 
         private const string WL = "--------------------------------------------";
 
@@ -19,9 +21,8 @@ namespace ReportService
         {
             SBuilder = new StringBuilder();
 
-            var date = new DateTime(year, month, 1);
-
-            FormattedReportDate = date.ToString("MMMM yyyy", System.Globalization.CultureInfo.CurrentCulture);
+            _year = year;
+            _month = month;
         }
 
         /// <summary>
@@ -33,7 +34,7 @@ namespace ReportService
         {
             return Task.Factory.StartNew(() =>
             {
-                SBuilder.AppendLine(FormattedReportDate);
+                SBuilder.AppendLine(GetFormattedDate());
 
                 var groupedByDepartment = employees.GroupBy(q => q.Department);
                 foreach (var department in groupedByDepartment)
@@ -58,7 +59,7 @@ namespace ReportService
         private void AppendEmployeeSalary(Employee employee)
         {
             SBuilder.AppendLine();
-            SBuilder.AppendLine(employee.Name + " " + FormattingSalary(employee.Salary.Value));
+            SBuilder.AppendLine(employee.Name + " " + GetFormattedSalary(employee.Salary.Value));
         }
 
         /// <summary>
@@ -68,7 +69,7 @@ namespace ReportService
         private void AppendTotalSalaryByDepartment(IGrouping<string, Employee> department)
         {
             SBuilder.AppendLine();
-            SBuilder.AppendLine("Всего по отделу " + FormattingSalary(department.Sum(s => s.Salary.Value)));
+            SBuilder.AppendLine("Всего по отделу " + GetFormattedSalary(department.Sum(s => s.Salary.Value)));
         }
 
         /// <summary>
@@ -80,7 +81,7 @@ namespace ReportService
             SBuilder.AppendLine();
             SBuilder.AppendLine(WL);
             SBuilder.AppendLine();
-            SBuilder.AppendLine("Всего по предприятию " + FormattingSalary(groupedByDepartment.Sum(s => s.Sum(e => e.Salary.Value))));
+            SBuilder.AppendLine("Всего по предприятию " + GetFormattedSalary(groupedByDepartment.Sum(s => s.Sum(e => e.Salary.Value))));
         }
 
         /// <summary>
@@ -100,9 +101,20 @@ namespace ReportService
         /// </summary>
         /// <param name="salary"></param>
         /// <returns></returns>
-        private string FormattingSalary(decimal salary)
+        public string GetFormattedSalary(decimal salary)
         {
             return Math.Round(salary, 0, MidpointRounding.AwayFromZero) + "р";
+        }
+
+        /// <summary>
+        /// Вернет отформатированную дату (MMMM yyyy).
+        /// </summary>
+        /// <returns></returns>
+        public string GetFormattedDate()
+        {
+            var date = new DateTime(_year, _month, 1);
+
+            return date.ToString("MMMM yyyy", CultureInfo.GetCultureInfo("ru-RU"));
         }
     }
 }

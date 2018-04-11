@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using ReportService.Controllers;
 using ReportService.Domain;
@@ -18,11 +19,13 @@ namespace ReportService.Test
             int validYear = 2018;
             int validMonth = 2;
 
+            var mockLogg = Mock.Of<ILogger<ReportController>>();
+
             var mockService = new Mock<IEmployeeService>();
             mockService.Setup(s => s.GetEmployeesWithSalaryAsync(validYear, validMonth))
                 .Returns(Task.FromResult(GetTestEmployeesWithSalary()));
 
-            var controller = new ReportController(mockService.Object);
+            var controller = new ReportController(mockService.Object, mockLogg);
 
             var result = await controller.Download(validYear, validMonth);
 
@@ -36,17 +39,19 @@ namespace ReportService.Test
             int notValidYear = 10000;
             int notValidMonth = 15;
 
+            var mockLogg = Mock.Of<ILogger<ReportController>>();
+
             var mockService = new Mock<IEmployeeService>();
             mockService.Setup(s => s.GetEmployeesWithSalaryAsync(notValidYear, notValidMonth))
                 .Returns(Task.FromResult(GetTestEmployeesWithSalary()));
 
-            var controller = new ReportController(mockService.Object);
-            
+            var controller = new ReportController(mockService.Object, mockLogg);
+
             var result = await controller.Download(notValidYear, notValidMonth);
 
             Assert.IsType<BadRequestResult>(result);
         }
-        
+
         private IEnumerable<Employee> GetTestEmployeesWithSalary()
         {
             var emps = new List<Employee>();
@@ -67,16 +72,9 @@ namespace ReportService.Test
 
         private decimal GetTestSalary()
         {
-            Task.Delay(500);
             var rand = new Random();
 
             return rand.Next(10000, 150000);
-        }
-
-        private string GetTestBuhCode()
-        {
-            Task.Delay(500);
-            return Guid.NewGuid().ToString();
         }
     }
 }

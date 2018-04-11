@@ -4,18 +4,18 @@ using System.Data;
 
 namespace ReportService.DAL
 {
-    public abstract class BaseRepository : IBaseRepository, IDisposable
+    public abstract class BaseRepository : IBaseRepository
     {
-        public IDbConnection Db { get; set; }
-
+        private readonly string _connectionString;
+        
         public BaseRepository(string connectionString)
         {
-            Db = new NpgsqlConnection(connectionString);
+            _connectionString = connectionString;
         }
 
-        public void Dispose()
+        public IDbConnection GetDbConnection()
         {
-            Db.Close();
+            return new NpgsqlConnection(_connectionString);
         }
     }
 }
