@@ -20,7 +20,7 @@ namespace ReportService.Test
 
             var employees = GetTestEmployees();
 
-            var result = await reportBuilder.MakeReportAsync(employees);
+            var result = await reportBuilder.BuildReportAsync(employees);
 
             var report = UTF8Encoding.UTF8.GetString(result);
 

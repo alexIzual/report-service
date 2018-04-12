@@ -21,11 +21,13 @@ namespace ReportService.Test
 
             var mockLogg = Mock.Of<ILogger<ReportController>>();
 
-            var mockService = new Mock<IEmployeeService>();
-            mockService.Setup(s => s.GetEmployeesWithSalaryAsync(validYear, validMonth))
+            var mockEmployeeService = new Mock<IEmployeeService>();
+            mockEmployeeService.Setup(s => s.GetEmployeesWithSalaryAsync(validYear, validMonth))
                 .Returns(Task.FromResult(GetTestEmployeesWithSalary()));
 
-            var controller = new ReportController(mockService.Object, mockLogg);
+            var mockReportService = new Mock<ReportHelperService>(mockEmployeeService.Object).Object;
+
+            var controller = new ReportController(mockReportService, mockLogg);
 
             var result = await controller.Download(validYear, validMonth);
 
@@ -41,11 +43,13 @@ namespace ReportService.Test
 
             var mockLogg = Mock.Of<ILogger<ReportController>>();
 
-            var mockService = new Mock<IEmployeeService>();
-            mockService.Setup(s => s.GetEmployeesWithSalaryAsync(notValidYear, notValidMonth))
+            var mockEmployeeService = new Mock<IEmployeeService>();
+            mockEmployeeService.Setup(s => s.GetEmployeesWithSalaryAsync(notValidYear, notValidMonth))
                 .Returns(Task.FromResult(GetTestEmployeesWithSalary()));
 
-            var controller = new ReportController(mockService.Object, mockLogg);
+            var mockReportService = new Mock<ReportHelperService>(mockEmployeeService.Object).Object;
+
+            var controller = new ReportController(mockReportService, mockLogg);
 
             var result = await controller.Download(notValidYear, notValidMonth);
 

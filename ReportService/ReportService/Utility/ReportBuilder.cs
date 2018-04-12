@@ -30,7 +30,7 @@ namespace ReportService
         /// </summary>
         /// <param name="employees"></param>
         /// <returns></returns>
-        public Task<byte[]> MakeReportAsync(IEnumerable<Employee> employees)
+        public Task<byte[]> BuildReportAsync(IEnumerable<Employee> employees)
         {
             return Task.Factory.StartNew(() =>
             {

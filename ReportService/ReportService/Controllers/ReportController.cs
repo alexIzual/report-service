@@ -10,11 +10,11 @@ namespace ReportService.Controllers
     public class ReportController : Controller
     {
         private readonly ILogger<ReportController> _logger;
-        private readonly IEmployeeService _employeeService;
+        private readonly IReportHelperService _reportService;
 
-        public ReportController(IEmployeeService employeeService, ILogger<ReportController> logger)
+        public ReportController(IReportHelperService reportService, ILogger<ReportController> logger)
         {
-            this._employeeService = employeeService;
+            this._reportService = reportService;
             this._logger = logger;
         }
 
@@ -28,9 +28,7 @@ namespace ReportService.Controllers
 
             try
             {
-                var employees = await _employeeService.GetEmployeesWithSalaryAsync(year, month);
-
-                byte[] buff = await new ReportBuilder(year, month).MakeReportAsync(employees);
+                var buff = await _reportService.MakeReportAsync(year, month);
 
                 string fileName = $"report_{month}_{year}.txt";
 
